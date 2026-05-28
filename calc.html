@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔢 Pro Calculator Ultra</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+overflow:hidden;
+}
+
+.container{
+width:100%;
+max-width:400px;
+padding:20px;
+height:100vh;
+overflow-y:auto;
+}
+
+.container::-webkit-scrollbar{
+width:0;
+}
+
+.calculator{
+background:rgba(255,255,255,0.1);
+backdrop-filter:blur(20px);
+border-radius:25px;
+padding:25px;
+box-shadow:0 25px 50px rgba(0,0,0,0.5);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+margin-bottom:15px;
+}
+
+.header button{
+padding:8px 12px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-size:1.2rem;
+background:rgba(255,255,255,0.1);
+color:white;
+}
+
+.tabs{
+display:flex;
+gap:5px;
+margin-bottom:15px;
+}
+
+.tab{
+flex:1;
+padding:10px;
+border:none;
+border-radius:10px;
+background:rgba(255,255,255,0.1);
+color:white;
+cursor:pointer;
+font-size:0.9rem;
+}
+
+.tab.active{
+background:linear-gradient(135deg,#667eea,#764ba2);
+}
+
+#display{
+width:100%;
+height:80px;
+font-size:2rem;
+text-align:right;
+margin-bottom:10px;
+background:rgba(0,0,0,0.3);
+color:#00ff88;
+border:none;
+border-radius:15px;
+padding:15px;
+font-family:'Courier New',monospace;
+}
+
+.buttons{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:10px;
+}
+
+button{
+padding:15px;
+font-size:1.1rem;
+font-weight:600;
+border:none;
+border-radius:12px;
+cursor:pointer;
+background:rgba(255,255,255,0.1);
+color:white;
+transition:0.2s;
+}
+
+button:hover{
+transform:translateY(-2px);
+}
+
+.operator{
+background:linear-gradient(135deg,#ff9500,#ff7700);
+}
+
+.equal{
+background:linear-gradient(135deg,#34c759,#30d158);
+grid-row:span 2;
+}
+
+.off{
+background:linear-gradient(135deg,#ff3b30,#ff6b6b);
+}
+
+.on{
+background:linear-gradient(135deg,#34c759,#30d158);
+}
+
+.clear{
+background:linear-gradient(135deg,#ff3b30,#d63031);
+}
+
+.del{
+background:linear-gradient(135deg,#fdcb6e,#f39c12);
+color:black;
+}
+
+.zero{
+grid-column:span 2;
+}
+
+.sci-row{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:8px;
+margin-bottom:15px;
+}
+
+.sci-row button{
+padding:12px;
+font-size:0.9rem;
+}
+
+.tools{
+display:none;
+}
+
+.tool-section{
+background:rgba(0,0,0,0.3);
+padding:20px;
+border-radius:15px;
+margin-bottom:15px;
+}
+
+.tool-section h3{
+color:white;
+margin-bottom:15px;
+}
+
+.tool-section input,
+.tool-section select{
+width:100%;
+padding:15px;
+margin-bottom:10px;
+border:none;
+border-radius:10px;
+background:rgba(255,255,255,0.1);
+color:white;
+font-size:1rem;
+}
+
+.tool-section option{
+background:#302b63;
+}
+
+.tool-section button{
+width:100%;
+background:linear-gradient(135deg,#667eea,#764ba2);
+}
+
+.result{
+color:#00ff88;
+font-size:1.2rem;
+text-align:center;
+margin-top:10px;
+font-weight:bold;
+}
+
+.history-panel{
+display:none;
+max-height:200px;
+overflow-y:auto;
+background:rgba(0,0,0,0.4);
+padding:15px;
+border-radius:15px;
+margin-top:10px;
+}
+
+.history-item{
+background:rgba(255,255,255,0.1);
+padding:10px;
+margin-bottom:8px;
+border-radius:8px;
+color:white;
+text-align:right;
+}
+
+.hidden{
+opacity:0.2;
+pointer-events:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<div class="calculator" id="calc">
+
+<div class="header">
+<button onclick="showTab('tools')">🔧</button>
+<button onclick="toggleHistory()">📋</button>
+<button onclick="toggleTheme()">🎨</button>
+</div>
+
+<div class="tabs">
+<button id="tab-calc" class="tab active" onclick="showTab('calc')">🔢 Calculator</button>
+<button id="tab-converter" class="tab" onclick="showTab('converter')">💱 Converter</button>
+<button id="tab-tools" class="tab" onclick="showTab('tools')">🛠️ Tools</button>
+</div>
+
+<div id="calcView">
+
+<div class="sci-row">
+<button onclick="func('sin')">sin</button>
+<button onclick="func('cos')">cos</button>
+<button onclick="func('tan')">tan</button>
+<button onclick="func('log')">log</button>
+</div>
+
+<input type="text" id="display" readonly placeholder="0">
+
+<div class="buttons">
+
+<button class="off" onclick="powerOff()">OFF</button>
+<button class="on" onclick="powerOn()">ON</button>
+<button class="clear" onclick="clearDisplay()">C</button>
+<button class="del" onclick="deleteLast()">⌫</button>
+
+<button onclick="inputNum('7')">7</button>
+<button onclick="inputNum('8')">8</button>
+<button onclick="inputNum('9')">9</button>
+<button class="operator" onclick="inputOp('/')">÷</button>
+
+<button onclick="inputNum('4')">4</button>
+<button onclick="inputNum('5')">5</button>
+<button onclick="inputNum('6')">6</button>
+<button class="operator" onclick="inputOp('*')">×</button>
+
+<button onclick="inputNum('1')">1</button>
+<button onclick="inputNum('2')">2</button>
+<button onclick="inputNum('3')">3</button>
+<button class="operator" onclick="inputOp('-')">-</button>
+
+<button onclick="inputNum('0')" class="zero">0</button>
+<button onclick="inputNum('.')">.</button>
+<button class="equal" onclick="calculate()">=</button>
+<button class="operator" onclick="inputOp('+')">+</button>
+
+</div>
+</div>
+
+<div class="history-panel" id="historyPanel">
+<button class="clear" style="width:100%;margin-bottom:10px;" onclick="clearHistory()">Clear All</button>
+<div id="historyList"></div>
+</div>
+
+<div class="tools" id="toolsPanel">
+
+<div class="tool-section">
+<h3>⚖️ BMI Calculator</h3>
+<input type="number" id="bmiWeight" placeholder="Weight (kg)">
+<input type="number" id="bmiHeight" placeholder="Height (cm)">
+<button onclick="calculateBMI()">Calculate BMI</button>
+<div class="result" id="bmiResult"></div>
+</div>
+
+<div class="tool-section">
+<h3>🎂 Age Calculator</h3>
+<input type="date" id="birthDate">
+<button onclick="calculateAge()">Calculate Age</button>
+<div class="result" id="ageResult"></div>
+</div>
+
+</div>
+
+<div class="tools" id="converterPanel">
+
+<div class="tool-section">
+<h3>🌡️ Temperature Converter</h3>
+
+<input type="number" id="tempInput" placeholder="Enter value">
+
+<select id="tempFrom">
+<option value="c">Celsius</option>
+<option value="f">Fahrenheit</option>
+</select>
+
+<select id="tempTo">
+<option value="f">Fahrenheit</option>
+<option value="c">Celsius</option>
+</select>
+
+<button onclick="convertTemp()">Convert</button>
+
+<div class="result" id="tempResult"></div>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+<script>
+
+let display=document.getElementById('display');
+let expression='';
+let isOn=true;
+let historyData=[];
+let currentTheme=1;
+
+function powerOff(){
+isOn=false;
+expression='';
+display.value='';
+document.getElementById('calc').classList.add('hidden');
+}
+
+function powerOn(){
+isOn=true;
+document.getElementById('calc').classList.remove('hidden');
+}
+
+function inputNum(num){
+if(!isOn) return;
+expression+=num;
+display.value=expression;
+}
+
+function inputOp(op){
+if(!isOn) return;
+expression+=op;
+display.value=expression;
+}
+
+function clearDisplay(){
+expression='';
+display.value='';
+}
+
+function deleteLast(){
+expression=expression.slice(0,-1);
+display.value=expression;
+}
+
+function calculate(){
+try{
+let result=eval(expression);
+historyData.unshift(expression+" = "+result);
+showHistory();
+expression=result.toString();
+display.value=result;
+}
+catch{
+display.value='Error';
+expression='';
+}
+}
+
+function func(type){
+
+try{
+
+let val=eval(expression||0);
+let result=0;
+
+if(type==='sin'){
+result=Math.sin(val*Math.PI/180);
+}
+
+if(type==='cos'){
+result=Math.cos(val*Math.PI/180);
+}
+
+if(type==='tan'){
+result=Math.tan(val*Math.PI/180);
+}
+
+if(type==='log'){
+result=Math.log10(val);
+}
+
+result=result.toFixed(6);
+
+historyData.unshift(type+"("+val+") = "+result);
+
+display.value=result;
+expression=result.toString();
+
+}
+catch{
+display.value='Error';
+}
+
+}
+
+function toggleHistory(){
+
+let panel=document.getElementById('historyPanel');
+
+if(panel.style.display==='block'){
+panel.style.display='none';
+}
+else{
+panel.style.display='block';
+showHistory();
+}
+
+}
+
+function showHistory(){
+
+let list=document.getElementById('historyList');
+
+if(historyData.length===0){
+list.innerHTML='<div class="history-item">No History</div>';
+return;
+}
+
+list.innerHTML='';
+
+historyData.forEach(function(item){
+
+list.innerHTML+=`
+<div class="history-item">${item}</div>
+`;
+
+});
+
+}
+
+function clearHistory(){
+historyData=[];
+showHistory();
+}
+
+function showTab(name){
+
+document.getElementById('calcView').style.display='none';
+document.getElementById('toolsPanel').style.display='none';
+document.getElementById('converterPanel').style.display='none';
+
+document.querySelectorAll('.tab').forEach(function(btn){
+btn.classList.remove('active');
+});
+
+document.getElementById('tab-'+name).classList.add('active');
+
+if(name==='calc'){
+document.getElementById('calcView').style.display='block';
+}
+
+if(name==='tools'){
+document.getElementById('toolsPanel').style.display='block';
+}
+
+if(name==='converter'){
+document.getElementById('converterPanel').style.display='block';
+}
+
+}
+
+function toggleTheme(){
+
+if(currentTheme===1){
+
+document.body.style.background='linear-gradient(135deg,#111,#434343)';
+currentTheme=2;
+
+}
+else{
+
+document.body.style.background='linear-gradient(135deg,#0f0c29,#302b63,#24243e)';
+currentTheme=1;
+
+}
+
+}
+
+function calculateBMI(){
+
+let weight=parseFloat(document.getElementById('bmiWeight').value);
+let height=parseFloat(document.getElementById('bmiHeight').value)/100;
+
+if(weight>0 && height>0){
+
+let bmi=(weight/(height*height)).toFixed(1);
+
+document.getElementById('bmiResult').innerText='BMI: '+bmi;
+
+}
+
+}
+
+function calculateAge(){
+
+let birth=document.getElementById('birthDate').value;
+
+if(!birth) return;
+
+let birthDate=new Date(birth);
+let today=new Date();
+
+let age=today.getFullYear()-birthDate.getFullYear();
+
+let m=today.getMonth()-birthDate.getMonth();
+
+if(m<0 || (m===0 && today.getDate()<birthDate.getDate())){
+age--;
+}
+
+document.getElementById('ageResult').innerText=age+' Years';
+
+}
+
+function convertTemp(){
+
+let value=parseFloat(document.getElementById('tempInput').value);
+
+let from=document.getElementById('tempFrom').value;
+let to=document.getElementById('tempTo').value;
+
+let result=value;
+
+if(from==='c' && to==='f'){
+result=(value*9/5)+32;
+}
+
+if(from==='f' && to==='c'){
+result=(value-32)*5/9;
+}
+
+document.getElementById('tempResult').innerText=result.toFixed(2);
+
+}
+
+</script>
+
+</body>
+</html>
