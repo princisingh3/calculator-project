@@ -349,6 +349,19 @@ let isOn=true;
 let historyData=[];
 let currentTheme=1;
 
+// Safe evaluation function - replaces eval()
+function safeEval(expr){
+try{
+expr=expr.replace(/\s/g,'');
+if(!/^[0-9+\-*/.()]*$/.test(expr)) throw new Error('Invalid characters');
+let result=Function('"use strict"; return ('+expr+')')();
+return result;
+}
+catch(error){
+throw new Error('Invalid expression');
+}
+}
+
 function powerOff(){
 isOn=false;
 expression='';
@@ -385,7 +398,7 @@ display.value=expression;
 
 function calculate(){
 try{
-let result=eval(expression);
+let result=safeEval(expression);
 historyData.unshift(expression+" = "+result);
 showHistory();
 expression=result.toString();
@@ -401,7 +414,7 @@ function func(type){
 
 try{
 
-let val=eval(expression||0);
+let val=safeEval(expression||0);
 let result=0;
 
 if(type==='sin'){
